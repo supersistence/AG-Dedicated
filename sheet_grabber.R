@@ -1,3 +1,5 @@
+# A small script to read in multiple pdf sheets, compile, and clean. 
+
 
 library(readxl) 
 library(dplyr)
@@ -18,3 +20,11 @@ mysheets <- as.data.frame(bind_rows(mysheets))
 
 # trim the extra rows from bottom that were captured in the initial read_excel_allsheets function
 mysheets <- mysheets[-c(1368:1376), ]
+
+# Convert the 'End Year' data to numeric
+mysheets$`End Year` = as.numeric(as.character(mysheets$`End Year`))
+
+# and peek at the distribution
+hist(mysheets$`End Year`)
+
+
