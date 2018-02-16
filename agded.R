@@ -1,7 +1,6 @@
 # Scraping City and County of Honolulu Real Property Tax Office Data
 
 
-
 ### Check for packages, install if necessary
 list.of.packages <- c("rvest", "magrittr", "tidyverse", "tabulizer", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
