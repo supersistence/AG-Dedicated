@@ -13,6 +13,7 @@ library(magrittr)
 library(tidyverse)
 library(tabulizer)
 library(dplyr)
+library(pdftables)
 
 rpad <- 'https://www.realpropertyhonolulu.com/media/1514/ag_2018_12-15-17.pdf'
 
