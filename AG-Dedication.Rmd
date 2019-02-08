@@ -1,0 +1,371 @@
+---
+title: "Agricultural Land Dedication Data Collection in the City and County of Honolulu"
+output: html_notebook
+---
+
+This project aims to:
+
+1. Compile historical agricultural dedication data.
+2. Collect (scrape) public tax record data of currently dedicated parcels.
+3. Quantify the total tax incentive provided by the City and County of Honolulu through the agricultural dedication process.
+4. Map the existing dedications and assess their distribution
+5. Begin exploring automated imagery anaylsis processing as a means to assess ""substaintial and continuous agricultural use".
+
+<hr>
+
+##  Compile Historical Agricultural Dedication Data
+The agricultural dedication process is overseen by the Real Property Assessment Division of the City and County of Honolulu's Department of Budget and Fiscal Services.
+Annually a dedication listing is posted to their website as tables in a pdf. Their webpage to access this information is https://www.realpropertyhonolulu.com/dedications/agricultural-dedications/
+
+A list of other reports by year, like 'Number and Amount of Exemptions by Type and County', can be found [here](https://www.realpropertyhonolulu.com/rpa-report/).
+
+
+While [`.pdf`](http://opendatahandbook.org/glossary/en/terms/pdf/) is an open format it is not machine readable which is a pain.
+
+There are a number of potential tools to extract from a table locked in a pdf into other formats. Tabulizer is an open source one that works.
+
+First we want to scrape the RPAD webpage (https://www.realpropertyhonolulu.com/dedications/agricultural-dedications/) for the most recent pdf of dedications.
+```{r}
+library(rvest)
+
+rpad <- read_html("https://www.realpropertyhonolulu.com/dedications/agricultural-dedications/")
+
+
+rrr <- rpad %>% html_nodes("a") %>% # nodes
+  html_attr('href') %>% data_frame()
+
+
+```
+
+Once files are collected, scrape the pages of tables into a single dataframe and label it by year
+
+```{r}
+library(tabulizer)
+library(dplyr)
+
+# extract tables from each page of pdf and store as a data frame
+table <- extract_tables("~/Documents/GitHub/AG-Dedicated/Dedication History/2015_ag_1yr.pdf", output = "data.frame")
+
+# combine list of all pages into a single dataframe
+t <- bind_rows(table)
+
+# take a look
+glimpse(t)
+
+# check to make sure headers weren't repeated in data set
+unique(t$End.Year)
+
+# rename and change formats as needed
+
+# change name to TMK and force type to character
+names(t)[1]<-"TMK"
+t$TMK <- as.character(t$TMK)
+
+t$End.Year <- as.numeric(t$End.Year)
+
+# make a column for the year the dedication datasheet is for 
+t$Year <- as.numeric(2015)
+
+#store as new variable
+ag15 <- t
+
+# clean up
+rm(table, t)
+```
+
+Repeat this for each year 
+
+```{r}
+#2016
+table <- extract_tables("~/Documents/GitHub/AG-Dedicated/Dedication History/2016 ag dedication.pdf", output = "data.frame")
+t <- bind_rows(table)
+glimpse(t)
+t <- bind_rows(table)
+unique(t$End.Year)
+names(t)[1]<-"TMK"
+t$TMK <- as.character(t$TMK)
+t$End.Year <- as.numeric(t$End.Year)
+t$Year <- as.numeric(2016)
+ag16 <- t
+rm(table, t)
+
+#2017
+table <- extract_tables("~/Documents/GitHub/AG-Dedicated/Dedication History/2017_ag.pdf", output = "data.frame")
+t <- bind_rows(table)
+glimpse(t)
+t <- bind_rows(table)
+unique(t$End.Year)
+names(t)[1]<-"TMK"
+t$TMK <- as.character(t$TMK)
+t$End.Year <- as.numeric(t$End.Year)
+t$Year <- as.numeric(2017)
+ag17 <- t
+rm(table, t)
+
+#2018
+table <- extract_tables("~/Documents/GitHub/AG-Dedicated/Dedication History/2018_ag_dedications.pdf", output = "data.frame")
+t <- bind_rows(table)
+glimpse(t)
+t <- bind_rows(table)
+unique(t$End.Year)
+names(t)[1]<-"TMK"
+t$TMK <- as.character(t$TMK)
+t$End.Year <- as.numeric(t$End.Year)
+t$Year <- as.numeric(2018)
+ag18 <- t
+rm(table, t)
+
+#2019
+table <- extract_tables("~/Documents/GitHub/AG-Dedicated/Dedication History/2019_ag_dedications.pdf", output = "data.frame")
+t <- bind_rows(table)
+glimpse(t)
+t <- bind_rows(table)
+unique(t$End.Year)
+names(t)[1]<-"TMK"
+t$TMK <- as.character(t$TMK)
+t$End.Year <- as.numeric(t$End.Year)
+t$Year <- as.numeric(2019)
+ag19 <- t
+rm(table, t)
+```
+
+Now merge all the data frames into a list
+
+```{r}
+# bind rows of all into a single dataframe
+dedications <- bind_rows(ag15, ag16, ag17, ag18, ag19)
+
+glimpse(dedications)
+
+# clean up
+rm(ag15, ag16, ag17, ag18, ag19)
+```
+
+### Explore the compiled data
+- TODO: turn output histograms into facet grid
+
+```{r}
+# Make a histogram of dedications by year
+library(ggplot2)
+
+qplot(dedications$Year,
+      geom="histogram",
+      main = "Agricultural Dedications by Year", 
+      xlab = "Year") 
+
+qplot(dedications$End.Year,
+      geom="histogram",
+      main = "Agricultural Dedications by End Year", 
+      xlab = "Year") 
+
+```
+
+
+
+
+```{r echo=TRUE}
+library(rJava)
+library(tabulizer)
+
+# variable of the dedication list pdf url
+rpad <- "https://www.realpropertyhonolulu.com/media/1569/ag.pdf" #2019
+
+# dowload file to disk (simple way)
+#download.file(rpad, "2018agdedications.pdf")
+
+# dowload file to disk (less simple way)
+# save filename with current year as file prefix
+filename <- paste((format(Sys.time(), "%Y")),"ag_dedications.pdf", sep = "_")
+# create path to subfolder with data from previous years
+path <- paste("Dedication History", filename, sep="/")
+# # download the file to disk
+download.file(rpad, path)
+
+#View the pdf file and look at the column headings and number of pages
+system(paste0('open "', rpad, '"'))
+
+# extract the tables from the pdf using tabulizer function
+tab1 <- extract_tables(rpad)
+str(tab1)
+
+# save header
+h <- tab1[[1]][1,]
+
+# merge all lists into one data frame
+tab1 <- setNames(as.data.frame(do.call("rbind", tab1), stringsAsFactors = FALSE), h)
+str(tab1)
+
+# Subset to remove all the header rows 
+tab1 <- subset(tab1, `End Year` != "End Year")
+
+# make years numeric values
+tab1$`End Year` <- as.numeric(tab1$`End Year`)
+
+#View file structure
+str(tab1)
+
+# View histogram of when dedications end
+hist(tab1$`End Year`)
+
+#clean up
+rm(rpad, path, filename, h)
+```
+<hr>
+## Collect (scrape) public tax record data of currently dedicated parcels
+
+
+```{r echo=TRUE}
+library(rvest)
+
+
+# Create a list of all the urls to be parsed based on the TMK of dedicated parcels
+# urls <- sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=%s", tab1$`Parcel ID (TMK)`) 
+
+for(i in (tab1$`Parcel ID (TMK)`[5])) {
+  html <- read_html(sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=%s",i))
+  
+  html2 <- read_html(sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?KEY=%s&show_history=1&",i))
+  
+  html3 <- read_html(sprintf("http://qpublic9.qpublic.net/hi_honolulu_land_print.php?KEY=%s", i))
+
+# Create empty list to add table data into
+   tbls <- list()
+
+# Specify which table(s) from html you want to grab & name them something useful (e.g., Ownership, ... , Uses)
+
+# Owner and Parcel Information
+    tbls$Ownership <- html %>%
+     html_nodes("table") %>%
+     .[3] %>%
+     html_table(fill = TRUE) %>%
+     .[[1]]
+ #  View(tbls$Ownership)
+
+ # Assessment Information, grabs full assessment history from html2 urls
+   tbls$Assessment <- html2 %>%
+     html_nodes("table") %>%
+     .[5] %>%
+     html_table(fill = TRUE) %>%
+     .[[1]]
+   View(tbls$Assessment)
+
+ #  Appeal Information
+   tbls$Land <- html %>%
+     html_nodes("table") %>%
+     .[6] %>%
+     html_table(fill = TRUE) %>%
+     .[[1]]
+   View(tbls$Appeal)
+
+#  Land Information
+  tbls$Land <- html %>%
+    html_nodes("table") %>%
+    .[7] %>%
+    html_table(fill = TRUE) %>%
+    .[[1]]
+  View(tbls$Land)
+
+  # Agricultural Assessment Information
+  tbls$AgAssess <- html %>%
+    html_nodes("table") %>%
+    .[8] %>%
+    html_table(fill = TRUE) %>%
+    .[[1]]
+  View(tbls$AgAssess)
+
+  # Agricultural Assessment Information (print page)
+  tbls$AgAssessP <- html3 %>%
+    html_nodes("table") %>%
+    .[4] %>%
+    html_table(fill = TRUE) %>%
+    .[[1]]
+  View(tbls$AgAssessP)
+
+  # Historical Tax Information
+  tbls$AllTax <- html2 %>%
+    html_nodes("table") %>%
+    .[15] %>%
+    html_table(fill = TRUE) %>%
+    .[[1]]
+  View(tbls$AllTax)
+  
+  # # Historical Tax Information
+  # tbls$AllTax <- html2 %>%
+  #   html_nodes("table") %>%
+  #   .[15] %>%
+  #   html_table(fill = TRUE) %>%
+  #   .[[1]]
+  # View(tbls$AllTax)
+}
+
+
+```
+
+
+```{r}
+library(tidyr)
+
+
+html <- read_html("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=340210010002")
+
+html
+
+# Create empty list to add table data into
+tbls <- list()
+
+# Specify which table(s) from html you want to grab & name them something useful (e.g., Ownership, ... , Uses)
+
+# Owner and Parcel Information
+    tbls$Ownership <- html %>%
+     html_nodes("table") %>%
+     .[3] %>%
+     html_table(fill = TRUE) %>%
+     .[[1]]
+  
+View(tbls$Ownership)
+
+# remove header
+tbls[[1]] <- tbls[[1]][-c(1),]
+
+
+View(tbls$Ownership)
+
+te <- spread(tbls$Ownership[1:2], key = X1, value = X2)
+View(te)
+
+te2 <- spread(tbls$Ownership[3:4], key = X3, value = X4)
+
+
+```
+
+## Now to some mapping of outputs
+```{r}
+
+library(rgdal)
+dlshape <- function(shploc, shpfile) {
+  temp=tempfile()
+  download.file(shploc, temp)
+  unzip(temp)
+  shp.data <- sapply(".", function(f) {
+    fp <- file.path(temp, f)
+    return(readOGR(".",shpfile))
+})
+}
+
+x = dlshape(shploc="http://files.hawaii.gov/dbedt/op/gis/data/oahtmk.shp.zip", "oahtmk")
+```
+
+```{r}
+library(raster)
+# read data    
+p <- shapefile("~/Downloads/oahtmk.shp/oahtmk.shp")
+d <- dedications
+
+# merge on common variable, here called 'key'
+m <- merge(p, d, by='key')
+
+# perhaps save as shapefile again
+shapefile(m, "path/merged.shp")
+```
+
+tmk8 <- dedications[1][1:5]
