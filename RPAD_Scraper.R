@@ -1,11 +1,11 @@
 library(rvest)
 
-
+dedications$TMK[2]
 
 # # Create a list of all the urls to be parsed based on the TMKs of dedicated parcels
-# urls <- sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=%s", dedications$TMK) 
+ urls <- sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=%s", dedications$TMK[2]) 
 
-for(i in (dedications$TMK[5663])) {
+for(i in (dedications$TMK[3720])) {
   
   # Main page on QPublic Parcel Data
   html <- read_html(sprintf("http://qpublic9.qpublic.net/hi_honolulu_display.php?county=hi_honolulu&KEY=%s",i))
@@ -39,7 +39,7 @@ for(i in (dedications$TMK[5663])) {
     .[[1]]
   tbls$Assessment <- tbls$Assessment[-1,] # remove redundant header
   tbls$Assessment <- head(tbls$Assessment, -1) # remove note at bottom ("2019 amended values not..." )
-  View(tbls$Assessment)
+ # View(tbls$Assessment)
   
   #  Appeal Information
   tbls$Land <- html %>%
@@ -88,6 +88,14 @@ for(i in (dedications$TMK[5663])) {
   #   html_table(fill = TRUE) %>%
   #   .[[1]]
   # View(tbls$AllTax)
+
+print(paste0(tbls$Ownership[8,2], " acres at ", tbls$Ownership[3,2],
+  " owned by ", tbls$Ownership[2,2], "."))
   
 }
+
+# acres
+tbls$Ownership[8,2]
+
+
 
