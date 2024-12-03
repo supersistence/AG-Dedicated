@@ -1,16 +1,27 @@
+![cover](/@yamauchi_1980%20cover.png)
+
 # Ag Dedicated
-**TLD;DR:**<br> 
+
+**TL;DR:**<br> 
 Hawai‘i’s agricultural dedications provide tax incentives for both active farming and vacant agricultural land, with this project analyzing dedication data, tax benefits, and compliance using tools like mapping and imagery analysis.
 
 ## Overview
 Tax incentives are widely used across the U.S. to support the agricultural sector and encourage the preservation of farmland. Differential assessments, also known as agricultural dedications, allow land to be taxed based on its agricultural use value rather than its often higher fair market value.
 
-Agricultural dedications are a key tool, applied by every county in Hawai‘i, to help farmers reduce their property tax burden and keep agricultural land in production. This project compiles and reviews data relevant to this approach.
+Agricultural dedications are a key tool, applied by every county in Hawai‘i, to help farmers reduce their property tax burden and keep agricultural land in production. This project compiles and reviews data relevant to this approach. [^1]
+
 
 Learn more about [differential assessments](http://www.farmlandinfo.org/differential-assessment-and-circuit-breaker-tax-programs)  and other tax policies help protect farmland and support agriculture, visit the [Farmland Information Center](http://www.farmlandinfo.org) of the [American Farmland Trust](https://www.farmland.org).
 
+## State of Hawaii
+
+First establish in Maryland in 1957, then in Hawaii in 1963
+
+[Hawaii Revised Statutes §246-12](https://law.justia.com/codes/hawaii/2013/title-14/chapter-246/section-246-12) outlines statewide rules for
+
+
 ## Honolulu County
-In Hawaii, each county provides some form of differential assessment for agricultural use. On Oahu, the [Revised Ordinances of Honolulu § 8-7.3](https://codelibrary.amlegal.com/codes/honolulu/latest/honolulu/0-0-0-5936) outlines the process and regulations for dedicating agricultural land. The ordinance provides a framework for landowners to commit their property to agricultural use for specific periods, offering tax benefits in return for maintaining the land's agricultural use. Each year there are around 1400 agricultural dedications across the island of Oahu. 
+In Hawaii, each county provides some form of differential assessment for agricultural use. On Oahu, the [Revised Ordinances of Honolulu §8-7.3](https://codelibrary.amlegal.com/codes/honolulu/latest/honolulu/0-0-0-5936) outlines the process and regulations for dedicating agricultural land. The ordinance provides a framework for landowners to commit their property to agricultural use for specific periods, offering tax benefits in return for maintaining the land's agricultural use. Each year there are around 1400 agricultural dedications across the island of Oahu. 
 
 
 The ordinance covers several important aspects:
@@ -43,3 +54,14 @@ The history of gross tax earnings and savings provide [some data](https://realpr
 **_5. Explore means to assess "substantial and continuous agricultural use"_**<br>
 Automated imagery analysis processing as a possibility.
 
+## References & Resources
+
+Co, Howard, "History and Provisions of the Agricultural Dedication Law in Hawaii, August 1974, unpublished draft manuscript cited with permission of author.
+
+Okimoto, Glenn Michiaki, 1981 OPTIMAL CONTROL FOR LAND USE DECISIONS IN HAWAII MODEL FORMULATION AND POTENTIAL APPLICABILITY
+
+https://scholarspace.manoa.hawaii.edu/server/api/core/bitstreams/24ccafa9-0cf2-4ea8-a4e7-32f37c427f80/content
+
+[1] 
+
+[^1] sfsdf

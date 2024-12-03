@@ -1,6 +1,8 @@
 ---
 title: "Agricultural Land Dedication Data Collection in the City and County of Honolulu"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 This project aims to:
@@ -232,12 +234,12 @@ library(rJava)
 library(tabulizer)
 
 # variable of the dedication list pdf url
-rpad <- "hViewttps://www.realpropertyhonolulu.com/media/1569/ag.pdf" #2019
+rpad <- "https://www.realpropertyhonolulu.com/media/1569/ag.pdf" #2019
 
-# dowload file to disk (simple way)
+# download file to disk (simple way)
 #download.file(rpad, "2018agdedications.pdf")
 
-# dowload file to disk (less simple way)
+# download file to disk (less simple way)
 # save filename with current year as file prefix
 filename <- paste((format(Sys.time(), "%Y")),"ag_dedications.pdf", sep = "_")
 # create path to subfolder with data from previous years
