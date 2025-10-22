@@ -1,0 +1,59 @@
+# Core dependencies
+pandas>=2.0.0
+numpy>=1.24.0
+
+# PDF extraction
+tabula-py>=2.8.0
+PyPDF2>=3.0.0
+
+# Web scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+selenium>=4.15.0  # For JavaScript-heavy sites if needed
+
+# Data visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.17.0
+
+# Jupyter notebooks
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0
+
+# Configuration
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# CLI
+click>=8.1.0
+rich>=13.5.0  # For beautiful CLI output
+tqdm>=4.66.0  # Progress bars
+
+# Logging
+loguru>=0.7.0
+
+# Data validation
+pydantic>=2.4.0
+jsonschema>=4.19.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+
+# Code quality
+black>=23.9.0
+flake8>=6.1.0
+mypy>=1.5.0
+isort>=5.12.0
+
+# Date handling
+python-dateutil>=2.8.2
+
+# Retry logic for web requests
+tenacity>=8.2.0
+
+# Environment detection
+platform>=1.0.8

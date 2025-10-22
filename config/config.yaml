@@ -1,0 +1,138 @@
+# AG-Dedicated Configuration File
+
+# Project paths (relative to project root)
+paths:
+  root: "."
+  data:
+    raw: "data/raw"
+    processed: "data/processed"
+    statutes: "data/statutes"
+  dedication_history: "Dedication History"
+  output: "Dedication History/output"
+  notebooks: "notebooks"
+  logs: "logs"
+
+# County configurations
+counties:
+  honolulu:
+    name: "City and County of Honolulu"
+    island: "Oahu"
+    enabled: true
+    sources:
+      pdf_dir: "Dedication History"
+      qpublic_url: "http://qpublic9.qpublic.net/hi_honolulu_display.php"
+      rpad_url: "https://www.realpropertyhonolulu.com/dedications/agricultural-dedications/"
+    dedication_periods:
+      - 5  # years
+      - 10
+    assessment_rates:
+      5_year: 0.03  # 3% of fair market value
+      10_year: 0.01  # 1% of fair market value
+    min_agricultural_use: 0.75  # 75% of usable land
+    application_deadline: null  # No specific deadline mentioned
+
+  hawaii:
+    name: "County of Hawaii"
+    island: "Big Island"
+    enabled: true
+    sources:
+      website: "https://hawaiipropertytax.com/"
+      qpublic_url: "https://www.qpublic.net/hi/hawaii/"
+    dedication_periods:
+      - 3   # Short-term
+      - 10  # Long-term
+    programs:
+      - name: "Short-Term Commercial"
+        years: 3
+        note: "Base valuation (e.g., $3,000/acre for orchards)"
+      - name: "Long-Term Commercial"
+        years: 10
+        note: "50% of short-term valuation"
+      - name: "Community Food Sustainability"
+        years: null
+        assessment_rate: 0.30  # 30% of market value
+    min_gross_income: 2000  # $2,000 annual requirement
+    application_deadline: null
+
+  maui:
+    name: "County of Maui"
+    island: "Maui"
+    enabled: true
+    sources:
+      website: "https://www.mauicounty.gov/"
+      qpublic_url: "https://qpublic.schneidercorp.com/Application.aspx?App=MauiCountyHI"
+    dedication_periods:
+      - 5
+      - 10
+      - 15
+      - 20
+    tax_rate: 5.74  # per $1,000 assessed value
+    application_deadline: "09-01"  # September 1
+    note: "Longer dedications receive greater assessment discounts"
+
+  kauai:
+    name: "County of Kauai"
+    island: "Kauai"
+    enabled: true
+    sources:
+      website: "https://www.kauai.gov/"
+      qpublic_url: "https://www.qpublic.net/hi/kauai/"
+    dedication_periods:
+      - 5
+    application_deadline: "07-01"  # July 1
+    office:
+      address: "4444 Rice Street, Suite A-454, Līhuʻe"
+      phone: "(808) 241-4224"
+    recent_changes: "Ordinance No. 1132 - new petition required"
+
+# PDF extraction settings
+pdf_extraction:
+  tool: "tabula"
+  pages: "all"
+  output_format: "csv"
+  lattice: false
+  stream: true
+  guess: true
+
+# Web scraping settings
+web_scraping:
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+  timeout: 30  # seconds
+  retry_attempts: 3
+  retry_delay: 2  # seconds
+  rate_limit:
+    requests_per_minute: 10
+    delay_between_requests: 6  # seconds (to stay under rate limit)
+  respect_robots_txt: true
+
+# Data processing
+data_processing:
+  min_year: 2013
+  max_year: 2024
+  petition_number_validation: "numeric_only"
+  remove_duplicates: true
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+  log_to_file: true
+  rotation: "10 MB"
+  retention: "1 month"
+
+# Analysis settings
+analysis:
+  statute_comparison:
+    metrics:
+      - "dedication_periods"
+      - "assessment_rates"
+      - "minimum_requirements"
+      - "application_deadlines"
+      - "compliance_rules"
+
+# Output settings
+output:
+  csv_encoding: "utf-8"
+  date_format: "%Y-%m-%d"
+  float_precision: 2
+  save_intermediate: true  # Save intermediate processing steps
