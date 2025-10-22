@@ -1,0 +1,58 @@
+================================================================================
+HAWAII AGRICULTURAL DEDICATION PROGRAM COMPARISON
+================================================================================
+
+Comparing 4 counties: Honolulu, Hawaii, Maui, Kauai
+
+--------------------------------------------------------------------------------
+DEDICATION PERIODS BY COUNTY
+--------------------------------------------------------------------------------
+City and County of Honolulu: 5 year, 10 year
+County of Hawaii: 3 year, 10 year
+County of Maui: 5 year, 10 year, 15 year, 20 year
+County of Kauai: 5 year
+
+--------------------------------------------------------------------------------
+REQUIREMENTS BY COUNTY
+--------------------------------------------------------------------------------
+
+Honolulu:
+  Deadline: None
+  Min Ag Use: 75.0% of usable land
+  Income Requirement: Revenue-generating production
+
+Hawaii:
+  Deadline: None
+  Min Gross Income: $2,000/year
+  Proof Required: Yes - agricultural production
+
+Maui:
+  Deadline: 09-01
+  Assessment Discount: Greater discounts for longer periods
+
+Kauai:
+  Deadline: 07-01
+  Recent Changes: Ordinance No. 1132 - new petition required
+
+--------------------------------------------------------------------------------
+ASSESSMENT METHODS
+--------------------------------------------------------------------------------
+
+City and County of Honolulu:
+  5-year: 3.0% of fair market value
+  10-year: 1.0% of fair market value
+
+County of Hawaii:
+  Short-Term Commercial: Base valuation (e.g., $3,000/acre for orchards)
+  Long-Term Commercial: 50% of short-term valuation
+  Community Food Sustainability: 
+
+County of Maui:
+  Tax rate: $5.74/Ƀ000 assessed value
+  Note: Longer dedications receive greater assessment discounts
+
+County of Kauai:
+  5-year commitment to commercial farming
+  Reduced property tax rate
+
+================================================================================

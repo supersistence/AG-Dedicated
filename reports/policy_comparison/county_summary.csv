@@ -1,0 +1,5 @@
+county,name,island,enabled,dedication_periods,application_deadline,assessment_rates,min_agricultural_use,programs,min_gross_income,tax_rate,note,office,recent_changes
+Honolulu,City and County of Honolulu,Oahu,True,"[5, 10]",,"{'5_year': 0.03, '10_year': 0.01}",0.75,,,,,,
+Hawaii,County of Hawaii,Big Island,True,"[3, 10]",,,,"[{'name': 'Short-Term Commercial', 'years': 3, 'note': 'Base valuation (e.g., $3,000/acre for orchards)'}, {'name': 'Long-Term Commercial', 'years': 10, 'note': '50% of short-term valuation'}, {'name': 'Community Food Sustainability', 'years': None, 'assessment_rate': 0.3}]",2000.0,,,,
+Maui,County of Maui,Maui,True,"[5, 10, 15, 20]",09-01,,,,,5.74,Longer dedications receive greater assessment discounts,,
+Kauai,County of Kauai,Kauai,True,[5],07-01,,,,,,,"{'address': '4444 Rice Street, Suite A-454, Līhuʻe', 'phone': '(808) 241-4224'}",Ordinance No. 1132 - new petition required
