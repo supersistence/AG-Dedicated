@@ -1,0 +1,69 @@
+================================================================================
+HAWAII AGRICULTURAL DEDICATION POLICY ANALYSIS
+Detailed Comparison Across All Counties
+================================================================================
+
+EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+This analysis compares agricultural land dedication programs across
+Hawaii's four counties (Honolulu, Hawaii, Maui, Kauai), examining:
+• Dedication period options
+• Assessment methodologies
+• Eligibility requirements
+• Application procedures
+• Recent policy changes
+
+DEDICATION PERIODS
+--------------------------------------------------------------------------------
+  County  3_year  5_year  10_year  15_year  20_year
+Honolulu   False    True     True    False    False
+  Hawaii    True   False     True    False    False
+    Maui   False    True     True     True     True
+   Kauai   False    True    False    False    False
+
+REQUIREMENTS
+--------------------------------------------------------------------------------
+  county deadline           min_ag_use            income_requirement min_gross_income                proof_required                  assessment_discount                             recent_changes
+Honolulu      NaN 75.0% of usable land Revenue-generating production              NaN                           NaN                                  NaN                                        NaN
+  Hawaii      NaN                  NaN                           NaN      $2,000/year Yes - agricultural production                                  NaN                                        NaN
+    Maui    09-01                  NaN                           NaN              NaN                           NaN Greater discounts for longer periods                                        NaN
+   Kauai    07-01                  NaN                           NaN              NaN                           NaN                                  NaN Ordinance No. 1132 - new petition required
+
+FLEXIBILITY SCORES
+--------------------------------------------------------------------------------
+
+Honolulu:
+  Period Options: 2
+  Assessment Methods: 1
+  Deadline Flexibility: 2
+  Requirements Clarity: 2
+  Total: 7
+
+Hawaii:
+  Period Options: 2
+  Assessment Methods: 3
+  Deadline Flexibility: 2
+  Requirements Clarity: 2
+  Total: 9
+
+Maui:
+  Period Options: 4
+  Assessment Methods: 1
+  Deadline Flexibility: 0
+  Requirements Clarity: 0
+  Total: 5
+
+Kauai:
+  Period Options: 1
+  Assessment Methods: 1
+  Deadline Flexibility: 0
+  Requirements Clarity: 1
+  Total: 3
+
+KEY FINDINGS
+--------------------------------------------------------------------------------
+1. Maui offers the most flexibility in dedication periods (4 options)
+2. Hawaii has the clearest income requirement ($2,000/year)
+3. Honolulu and Hawaii allow rolling applications (no deadline)
+4. Recent reforms in Hawaii and Kauai show active policy evolution
+
