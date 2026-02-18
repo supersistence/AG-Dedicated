@@ -66,6 +66,13 @@ Thumbs.db
 # Project-specific
 old version scrapes
 2021 ag dedications
+*.zip
+
+# Working directories (local only)
+council_district_analysis/
+farming_regions_analysis/
+output/
+checkpoints/
 
 # Large output files (keep structure, ignore contents)
 Dedication History/output/*.csv
