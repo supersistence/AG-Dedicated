@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG-Dedicated | Hawaii Agricultural Land Dedication Analysis</title>
+<meta name="description" content="Comprehensive analysis of Hawaii's agricultural property tax dedication system across all four counties. A modern data science toolkit for understanding tax incentive programs, compliance patterns, and policy differences.">
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --earth-900: #1a1207;
+  --earth-800: #2d2010;
+  --earth-700: #3d2e1a;
+  --earth-600: #5c4a2a;
+  --earth-500: #7a6340;
+  --earth-400: #9b8563;
+  --earth-300: #bfa882;
+  --earth-200: #d9c9a8;
+  --earth-100: #ede4d3;
+  --earth-50: #f7f3eb;
+
+  --green-900: #0f2a14;
+  --green-800: #1a4424;
+  --green-700: #276636;
+  --green-600: #2e7d32;
+  --green-500: #43a047;
+  --green-400: #66bb6a;
+  --green-300: #a5d6a7;
+  --green-200: #c8e6c9;
+  --green-100: #e8f5e9;
+
+  --ocean-700: #0d3b66;
+  --ocean-600: #1565c0;
+  --ocean-500: #1976d2;
+  --ocean-400: #42a5f5;
+  --ocean-300: #90caf9;
+  --ocean-200: #bbdefb;
+
+  --lava-600: #c62828;
+  --lava-500: #e53935;
+  --lava-400: #ef5350;
+
+  --sunset-500: #ef6c00;
+  --sunset-400: #fb8c00;
+  --sunset-300: #ffa726;
+
+  --text-primary: #1a1207;
+  --text-secondary: #5c4a2a;
+  --text-muted: #7a6340;
+  --text-inverse: #f7f3eb;
+
+  --bg-primary: #faf8f4;
+  --bg-secondary: #f7f3eb;
+  --bg-card: #ffffff;
+
+  --shadow-sm: 0 1px 3px rgba(26,18,7,0.08);
+  --shadow-md: 0 4px 12px rgba(26,18,7,0.1);
+  --shadow-lg: 0 8px 32px rgba(26,18,7,0.12);
+  --shadow-xl: 0 16px 48px rgba(26,18,7,0.16);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-serif: 'Merriweather', Georgia, serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; }
+h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); letter-spacing: -0.025em; }
+h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); letter-spacing: -0.02em; }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
+p { max-width: 72ch; }
+a { color: var(--green-600); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--green-800); }
+
+/* ===== Layout ===== */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 96px 0; }
+.section--alt { background: var(--bg-secondary); }
+
+/* ===== Navigation ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(26,18,7,0.06);
+  transition: box-shadow 0.3s;
+}
+.nav.scrolled { box-shadow: var(--shadow-md); }
+.nav__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 64px;
+}
+.nav__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--text-primary); }
+.nav__brand svg { width: 28px; height: 28px; }
+.nav__links { display: flex; gap: 32px; list-style: none; }
+.nav__links a { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+.nav__links a:hover { color: var(--green-600); }
+.nav__hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+.nav__hamburger svg { width: 24px; height: 24px; stroke: var(--text-primary); }
+
+/* ===== Hero ===== */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, var(--earth-800) 0%, var(--green-900) 40%, var(--earth-900) 100%);
+}
+.hero__bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(46,125,50,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 70%, rgba(239,108,0,0.08) 0%, transparent 60%);
+}
+.hero__grid {
+  position: absolute; inset: 0; opacity: 0.04;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero__content { position: relative; z-index: 2; padding: 120px 0 80px; }
+.hero__badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 100px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: var(--green-300); font-size: 0.82rem; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 24px;
+}
+.hero__badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green-400); }
+.hero__title { color: #fff; margin-bottom: 24px; max-width: 700px; }
+.hero__title span { color: var(--green-400); }
+.hero__subtitle { color: rgba(255,255,255,0.7); font-size: 1.15rem; max-width: 600px; margin-bottom: 40px; line-height: 1.8; }
+.hero__actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: var(--radius-md);
+  font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  transition: all 0.25s; border: none; text-decoration: none;
+}
+.btn--primary {
+  background: var(--green-600); color: #fff;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.3);
+}
+.btn--primary:hover { background: var(--green-700); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,125,50,0.4); }
+.btn--outline {
+  background: transparent; color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.25);
+}
+.btn--outline:hover { border-color: rgba(255,255,255,0.5); color: #fff; background: rgba(255,255,255,0.05); }
+
+.hero__stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+  margin-top: 64px; background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.hero__stat {
+  padding: 28px 24px; text-align: center;
+  background: rgba(255,255,255,0.03);
+}
+.hero__stat-value { display: block; font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.hero__stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+/* ===== Section Headers ===== */
+.section__header { text-align: center; margin-bottom: 64px; }
+.section__eyebrow {
+  display: inline-block; font-size: 0.78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--green-600); margin-bottom: 12px;
+}
+.section__title { margin-bottom: 16px; }
+.section__desc { color: var(--text-secondary); font-size: 1.05rem; margin: 0 auto; }
+
+/* ===== About / Research ===== */
+.about__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.about__text p { color: var(--text-secondary); margin-bottom: 16px; }
+.about__text p:first-of-type { font-size: 1.1rem; color: var(--text-primary); font-weight: 500; }
+.about__sidebar { display: flex; flex-direction: column; gap: 24px; }
+.about__card {
+  padding: 28px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(26,18,7,0.06);
+  box-shadow: var(--shadow-sm);
+}
+.about__card h4 { font-size: 1rem; margin-bottom: 8px; }
+.about__card p { font-size: 0.9rem; color: var(--text-secondary); }
+.about__card-icon {
+  width: 40px; height: 40px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; font-size: 1.2rem;
+}
+.about__card-icon--green { background: var(--green-100); color: var(--green-700); }
+.about__card-icon--earth { background: var(--earth-100); color: var(--earth-600); }
+.about__card-icon--ocean { background: var(--ocean-200); color: var(--ocean-700); }
+
+.yamauchi {
+  margin-top: 48px; padding: 32px;
+  background: linear-gradient(135deg, var(--earth-100), var(--green-100));
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--green-600);
+}
+.yamauchi h4 { margin-bottom: 12px; }
+.yamauchi p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px; }
+.yamauchi__formula {
+  font-family: var(--font-mono); font-size: 0.85rem;
+  background: rgba(255,255,255,0.6); padding: 16px;
+  border-radius: var(--radius-sm); margin-top: 12px;
+  line-height: 2;
+}
+
+/* ===== County Comparison ===== */
+.counties__tabs {
+  display: flex; gap: 8px; justify-content: center;
+  margin-bottom: 48px; flex-wrap: wrap;
+}
+.county-tab {
+  padding: 10px 24px; border-radius: 100px;
+  background: var(--bg-card); border: 1.5px solid rgba(26,18,7,0.1);
+  font-weight: 600; font-size: 0.88rem; cursor: pointer;
+  transition: all 0.25s; color: var(--text-secondary);
+}
+.county-tab:hover { border-color: var(--green-400); color: var(--green-700); }
+.county-tab.active {
+  background: var(--green-600); color: #fff; border-color: var(--green-600);
+}
+
+.comparison-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  overflow: hidden; box-shadow: var(--shadow-md);
+}
+.comparison-table thead { background: var(--earth-800); }
+.comparison-table th {
+  padding: 16px 20px; text-align: left;
+  color: var(--earth-100); font-size: 0.82rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.comparison-table td {
+  padding: 16px 20px; border-bottom: 1px solid rgba(26,18,7,0.06);
+  font-size: 0.92rem; vertical-align: top;
+}
+.comparison-table tbody tr:last-child td { border-bottom: none; }
+.comparison-table tbody tr:hover { background: var(--earth-50); }
+.comparison-table .county-name { font-weight: 700; white-space: nowrap; }
+
+.county-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 48px; }
+.county-card {
+  padding: 32px; border-radius: var(--radius-lg);
+  background: var(--bg-card); border: 1px solid rgba(26,18,7,0.06);
+  box-shadow: var(--shadow-sm); transition: all 0.3s;
+}
+.county-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.county-card__header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.county-card__dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.county-card__dot--honolulu { background: var(--ocean-500); }
+.county-card__dot--hawaii { background: var(--lava-500); }
+.county-card__dot--maui { background: var(--sunset-500); }
+.county-card__dot--kauai { background: var(--green-600); }
+.county-card h3 { font-size: 1.15rem; }
+.county-card__island { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; margin-left: auto; }
+.county-card__details { list-style: none; }
+.county-card__details li {
+  padding: 10px 0; border-bottom: 1px solid rgba(26,18,7,0.04);
+  font-size: 0.9rem; display: flex; justify-content: space-between;
+  gap: 16px;
+}
+.county-card__details li:last-child { border-bottom: none; }
+.county-card__details .label { color: var(--text-muted); font-size: 0.82rem; }
+.county-card__details .value { font-weight: 600; text-align: right; }
+
+/* ===== Data & Findings ===== */
+.findings__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px; }
+.finding-card {
+  padding: 32px; border-radius: var(--radius-lg);
+  background: var(--bg-card); border: 1px solid rgba(26,18,7,0.06);
+  box-shadow: var(--shadow-sm);
+}
+.finding-card__value {
+  font-size: 2.2rem; font-weight: 800; margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.finding-card__label { font-weight: 600; margin-bottom: 4px; }
+.finding-card__desc { font-size: 0.85rem; color: var(--text-muted); }
+
+/* CSS Charts */
+.chart-container {
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: 32px; box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(26,18,7,0.06); margin-bottom: 32px;
+}
+.chart-container h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.chart-container .chart-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; }
+
+/* Bar chart */
+.bar-chart { display: flex; flex-direction: column; gap: 14px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-label { width: 60px; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 32px; background: var(--earth-50); border-radius: var(--radius-sm); overflow: hidden; position: relative; }
+.bar-fill {
+  height: 100%; border-radius: var(--radius-sm);
+  display: flex; align-items: center; padding-left: 12px;
+  font-size: 0.78rem; font-weight: 600; color: #fff;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.bar-fill--green { background: linear-gradient(90deg, var(--green-600), var(--green-500)); }
+.bar-fill--earth { background: linear-gradient(90deg, var(--earth-600), var(--earth-400)); }
+.bar-fill--ocean { background: linear-gradient(90deg, var(--ocean-600), var(--ocean-400)); }
+.bar-fill--lava { background: linear-gradient(90deg, var(--lava-600), var(--lava-400)); }
+.bar-fill--sunset { background: linear-gradient(90deg, var(--sunset-500), var(--sunset-300)); }
+
+/* Horizontal stacked chart */
+.stacked-chart { margin-top: 16px; }
+.stacked-row { margin-bottom: 20px; }
+.stacked-row__label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+.stacked-bar { display: flex; height: 28px; border-radius: var(--radius-sm); overflow: hidden; }
+.stacked-segment {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 600; color: #fff;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Donut chart */
+.donut-container { display: flex; align-items: center; gap: 48px; justify-content: center; flex-wrap: wrap; }
+.donut {
+  width: 200px; height: 200px; border-radius: 50%; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.donut__center {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--bg-card); display: flex; align-items: center;
+  justify-content: center; flex-direction: column; z-index: 2;
+  box-shadow: var(--shadow-sm);
+}
+.donut__center-value { font-size: 1.4rem; font-weight: 800; color: var(--green-700); }
+.donut__center-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 500; }
+.donut-legend { display: flex; flex-direction: column; gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+/* Timeline chart */
+.timeline-chart { position: relative; padding: 20px 0; }
+.timeline-chart__grid {
+  display: grid; grid-template-columns: repeat(12, 1fr);
+  gap: 6px; align-items: end; min-height: 200px;
+}
+.timeline-bar {
+  border-radius: 4px 4px 0 0;
+  transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; cursor: default; min-height: 4px;
+}
+.timeline-bar:hover .timeline-tooltip { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+.timeline-tooltip {
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); background: var(--earth-800);
+  color: #fff; padding: 6px 12px; border-radius: var(--radius-sm);
+  font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  opacity: 0; transition: all 0.2s; pointer-events: none;
+}
+.timeline-labels {
+  display: grid; grid-template-columns: repeat(12, 1fr);
+  gap: 6px; margin-top: 8px;
+}
+.timeline-labels span {
+  font-size: 0.7rem; color: var(--text-muted); text-align: center; font-weight: 500;
+}
+
+/* ===== CLI Section ===== */
+.cli__content { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.cli__text p { color: var(--text-secondary); margin-bottom: 16px; }
+.cli__features { list-style: none; margin-top: 24px; }
+.cli__features li {
+  padding: 12px 0; display: flex; gap: 12px; align-items: flex-start;
+  border-bottom: 1px solid rgba(26,18,7,0.04);
+}
+.cli__features li:last-child { border-bottom: none; }
+.cli__check {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--green-100); color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0; margin-top: 2px;
+}
+.cli__feature-text { font-size: 0.92rem; }
+.cli__feature-text strong { display: block; margin-bottom: 2px; }
+.cli__feature-text span { color: var(--text-muted); font-size: 0.85rem; }
+
+.terminal {
+  background: var(--earth-900);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-mono);
+}
+.terminal__header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+}
+.terminal__dot { width: 12px; height: 12px; border-radius: 50%; }
+.terminal__dot--red { background: #ff5f57; }
+.terminal__dot--yellow { background: #febc2e; }
+.terminal__dot--green { background: #28c840; }
+.terminal__title { flex: 1; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.3); }
+.terminal__body { padding: 20px; overflow-x: auto; }
+.terminal__line { margin-bottom: 6px; font-size: 0.82rem; line-height: 1.6; }
+.terminal__prompt { color: var(--green-400); }
+.terminal__cmd { color: #fff; }
+.terminal__comment { color: rgba(255,255,255,0.3); }
+.terminal__output { color: rgba(255,255,255,0.55); }
+.terminal__highlight { color: var(--sunset-300); }
+
+/* ===== Pipeline ===== */
+.pipeline {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin: 48px 0; flex-wrap: wrap;
+}
+.pipeline__step {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 20px; text-align: center;
+  position: relative;
+}
+.pipeline__icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 12px;
+}
+.pipeline__icon--pdf { background: var(--lava-500); color: #fff; }
+.pipeline__icon--extract { background: var(--sunset-500); color: #fff; }
+.pipeline__icon--merge { background: var(--ocean-500); color: #fff; }
+.pipeline__icon--scrape { background: var(--green-600); color: #fff; }
+.pipeline__icon--analyze { background: var(--earth-600); color: #fff; }
+.pipeline__step-title { font-weight: 700; font-size: 0.88rem; margin-bottom: 2px; }
+.pipeline__step-desc { font-size: 0.78rem; color: var(--text-muted); }
+.pipeline__arrow {
+  font-size: 1.2rem; color: var(--earth-300); margin: 0 4px;
+  display: flex; align-items: center;
+}
+
+/* ===== Footer ===== */
+.footer {
+  background: var(--earth-800); color: var(--earth-200);
+  padding: 64px 0 32px;
+}
+.footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer__brand p { font-size: 0.9rem; color: var(--earth-300); margin-top: 12px; line-height: 1.7; max-width: 320px; }
+.footer__heading { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--earth-100); margin-bottom: 16px; }
+.footer__links { list-style: none; }
+.footer__links li { margin-bottom: 10px; }
+.footer__links a { color: var(--earth-300); font-size: 0.88rem; transition: color 0.2s; }
+.footer__links a:hover { color: var(--green-400); }
+.footer__divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px; }
+.footer__bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--earth-400); }
+.footer__bottom a { color: var(--earth-300); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .about__grid { grid-template-columns: 1fr; gap: 48px; }
+  .cli__content { grid-template-columns: 1fr; }
+  .footer__grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  .section { padding: 64px 0; }
+  .hero__stats { grid-template-columns: repeat(2, 1fr); }
+  .nav__links { display: none; }
+  .nav__links.open {
+    display: flex; flex-direction: column; position: absolute;
+    top: 64px; left: 0; right: 0; background: rgba(250,248,244,0.98);
+    padding: 24px; gap: 16px; border-bottom: 1px solid rgba(26,18,7,0.06);
+    backdrop-filter: blur(12px);
+  }
+  .nav__hamburger { display: block; }
+  .comparison-table { font-size: 0.85rem; }
+  .comparison-table th, .comparison-table td { padding: 12px; }
+  .county-cards { grid-template-columns: 1fr; }
+  .findings__grid { grid-template-columns: 1fr; }
+  .pipeline { flex-direction: column; }
+  .pipeline__arrow { transform: rotate(90deg); }
+  .footer__grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer__bottom { flex-direction: column; gap: 8px; text-align: center; }
+  .donut-container { flex-direction: column; }
+  .timeline-chart__grid { min-height: 150px; }
+}
+@media (max-width: 480px) {
+  .hero__stats { grid-template-columns: 1fr 1fr; }
+  .hero__stat { padding: 20px 16px; }
+  .hero__stat-value { font-size: 1.4rem; }
+  .counties__tabs { gap: 6px; }
+  .county-tab { padding: 8px 16px; font-size: 0.82rem; }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.8s ease-out both; }
+.fade-up-1 { animation-delay: 0.1s; }
+.fade-up-2 { animation-delay: 0.2s; }
+.fade-up-3 { animation-delay: 0.3s; }
+.fade-up-4 { animation-delay: 0.4s; }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(20px); transition: all 0.7s ease-out; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="parcels_cdl.js"></script>
+</head>
+<body>
+
+<!-- ========== Navigation ========== -->
+<nav class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#" class="nav__brand">
+      <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#2e7d32"/><path d="M14 6c-1.5 3-5 5-5 10a5 5 0 0010 0c0-5-3.5-7-5-10z" fill="#fff" opacity="0.9"/><path d="M12 14c0 2.5 1 4 2 5m0-5c1 1 2 2.5 2 5" stroke="#2e7d32" stroke-width="1.2" fill="none"/></svg>
+      AG-Dedicated
+    </a>
+    <ul class="nav__links" id="navLinks">
+      <li><a href="#about">Research</a></li>
+      <li><a href="#counties">Counties</a></li>
+      <li><a href="#findings">Findings</a></li>
+      <li><a href="#map">Map</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="https://github.com/supersistence/AG-Dedicated" target="_blank">GitHub</a></li>
+    </ul>
+    <button class="nav__hamburger" id="hamburger" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ========== Hero ========== -->
+<section class="hero" id="hero">
+  <div class="hero__bg"></div>
+  <div class="hero__grid"></div>
+  <div class="container hero__content">
+    <div class="hero__badge fade-up">Research Project</div>
+    <h1 class="hero__title fade-up fade-up-1">
+      Understanding Hawaii's <span>Agricultural Dedication</span> Programs
+    </h1>
+    <p class="hero__subtitle fade-up fade-up-2">
+      A comprehensive data science toolkit analyzing property tax dedication systems across all four Hawaii counties. Quantifying tax incentives, compliance patterns, and distributional impacts since 1963.
+    </p>
+    <div class="hero__actions fade-up fade-up-3">
+      <a href="#findings" class="btn btn--primary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h3v12H2zM6.5 6H9.5v8H6.5zM11 4h3v10h-3z"/></svg>
+        View Findings
+      </a>
+      <a href="#tools" class="btn btn--outline">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 1v2h8V4H4zm0 4v2h5V8H4z"/></svg>
+        Explore the Toolkit
+      </a>
+    </div>
+    <div class="hero__stats fade-up fade-up-4">
+      <div class="hero__stat">
+        <span class="hero__stat-value">4</span>
+        <span class="hero__stat-label">Counties Analyzed</span>
+      </div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">1,400+</span>
+        <span class="hero__stat-label">Annual Dedications</span>
+      </div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">12</span>
+        <span class="hero__stat-label">Years of Data</span>
+      </div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">1963</span>
+        <span class="hero__stat-label">Program Established</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== About / Research ========== -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="about__grid">
+      <div class="about__text reveal">
+        <div class="section__eyebrow">About the Research</div>
+        <h2 class="section__title">Who Benefits from Agricultural Tax Incentives?</h2>
+        <p>AG-Dedicated examines the distributional impacts of Hawaii's agricultural property tax dedication programs -- systems that allow farmland to be taxed at its agricultural use value rather than fair market value.</p>
+        <p>Originally established statewide in 1963 under HRS &sect;246-12 and expanded by Act 175 in 1973, these programs now operate entirely under county ordinances after the state statute was repealed in 2016. They provide significant property tax relief to encourage agricultural production and farmland preservation. But at what cost to other taxpayers, and who truly benefits?</p>
+        <p>Building on Yamauchi's (1980) seminal framework for analyzing preferential property tax treatment, this research quantifies foregone tax revenue, identifies how the tax burden shifts to other property classes, and maps the distribution of benefits across owner types and parcel sizes.</p>
+
+        <div class="yamauchi">
+          <h4>Yamauchi (1980) Framework</h4>
+          <p>Our analysis applies the distributional impact model from <em>"Measuring Foregone Taxes and Distributional Impacts of Use-Value Taxation Over Time in Hawaii"</em> (University of Hawaii, CTAHR).</p>
+          <div class="yamauchi__formula">
+            <div>Delta V(t) = V_market(t) - V_use(t) &nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted)">// Annual reduction</span></div>
+            <div>C(t) = C(t-1) + Delta V(t) &nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted)">// Cumulative base erosion</span></div>
+            <div>M(t) = r_ag(t) * C(t) &nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted)">// Foregone revenue</span></div>
+            <div>r*(t) = r(t) * TB / (TB - C) &nbsp;&nbsp;&nbsp;<span style="color:var(--text-muted)">// Effective rate shift</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about__sidebar reveal">
+        <div class="about__card">
+          <div class="about__card-icon about__card-icon--green">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C7.5 5 3 7 3 13a7 7 0 0014 0c0-6-4.5-8-7-11z"/></svg>
+          </div>
+          <h4>Farmland Preservation</h4>
+          <p>Dedication programs reduce development pressure on agricultural land by lowering property tax burdens for active farmers.</p>
+        </div>
+        <div class="about__card">
+          <div class="about__card-icon about__card-icon--earth">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3h5v5H3zM12 3h5v5h-5zM3 12h5v5H3zM12 12h5v5h-5z"/></svg>
+          </div>
+          <h4>Multi-County Analysis</h4>
+          <p>Each of Hawaii's four counties implements its own dedication rules with distinct periods, rates, and requirements.</p>
+        </div>
+        <div class="about__card">
+          <div class="about__card-icon about__card-icon--ocean">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm8-6v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h4>Longitudinal Data</h4>
+          <p>12 years of RPAD records (2013-2024) tracking over 17,000 parcel-year observations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== County Comparison ========== -->
+<section class="section section--alt" id="counties">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">County Programs</div>
+      <h2 class="section__title">Four Counties, Four Approaches</h2>
+      <p class="section__desc">Each county implements agricultural dedication with distinct rules, periods, and assessment methods.</p>
+    </div>
+
+    <!-- Main Comparison Table -->
+    <div class="reveal" style="overflow-x: auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Honolulu (Oahu)</th>
+            <th>Hawaii (Big Island)</th>
+            <th>Maui</th>
+            <th>Kauai</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="county-name">Dedication Periods</td>
+            <td>5 or 10 years</td>
+            <td>3 or 10 years</td>
+            <td>5, 10, 15, or 20 years</td>
+            <td>5 years</td>
+          </tr>
+          <tr>
+            <td class="county-name">Assessment Rate</td>
+            <td>5-yr: 3% FMV<br>10-yr: 1% FMV</td>
+            <td>Short-term: base rate<br>Long-term: 50% of base<br>Community: 30% MV</td>
+            <td>$5.74 / $1,000 assessed<br>Longer = greater discount</td>
+            <td>Reduced rate for<br>commercial farming</td>
+          </tr>
+          <tr>
+            <td class="county-name">Key Requirement</td>
+            <td>&ge;75% usable land<br>in agricultural use</td>
+            <td>$2,000 minimum<br>annual gross income</td>
+            <td>Active agricultural<br>commitment required</td>
+            <td>Commercial farming<br>commitment</td>
+          </tr>
+          <tr>
+            <td class="county-name">Application Deadline</td>
+            <td>No fixed deadline</td>
+            <td>Not specified</td>
+            <td>September 1</td>
+            <td>July 1</td>
+          </tr>
+          <tr>
+            <td class="county-name">Annual Volume</td>
+            <td>~1,400 dedications</td>
+            <td>Data collection<br>in progress</td>
+            <td>Data collection<br>in progress</td>
+            <td>Data collection<br>in progress</td>
+          </tr>
+          <tr>
+            <td class="county-name">Recent Changes</td>
+            <td>Stable program</td>
+            <td>2023 ordinance against<br>"gentleman farmer" abuse</td>
+            <td>Encouraging longer-term<br>commitments</td>
+            <td>Ordinance No. 1132<br>new petition required</td>
+          </tr>
+          <tr>
+            <td class="county-name">Data Source</td>
+            <td>RPAD PDFs +<br>QPublic</td>
+            <td>County website +<br>QPublic</td>
+            <td>County RPA +<br>QPublic</td>
+            <td>Assessment Office +<br>QPublic</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- County Detail Cards -->
+    <div class="county-cards">
+      <div class="county-card reveal">
+        <div class="county-card__header">
+          <div class="county-card__dot county-card__dot--honolulu"></div>
+          <h3>Honolulu County</h3>
+          <span class="county-card__island">Oahu</span>
+        </div>
+        <ul class="county-card__details">
+          <li><span class="label">Status</span><span class="value" style="color:var(--green-600)">Fully Implemented</span></li>
+          <li><span class="label">5-Year Assessment</span><span class="value">3% of Fair Market Value</span></li>
+          <li><span class="label">10-Year Assessment</span><span class="value">1% of Fair Market Value</span></li>
+          <li><span class="label">Land Use Minimum</span><span class="value">&ge;75% usable land</span></li>
+          <li><span class="label">Governing Law</span><span class="value">ROH &sect;8-7.3</span></li>
+        </ul>
+      </div>
+      <div class="county-card reveal">
+        <div class="county-card__header">
+          <div class="county-card__dot county-card__dot--hawaii"></div>
+          <h3>Hawaii County</h3>
+          <span class="county-card__island">Big Island</span>
+        </div>
+        <ul class="county-card__details">
+          <li><span class="label">Status</span><span class="value" style="color:var(--sunset-500)">In Progress</span></li>
+          <li><span class="label">Short-Term (3yr)</span><span class="value">Base valuation ($3,000/ac)</span></li>
+          <li><span class="label">Long-Term (10yr)</span><span class="value">50% of short-term rate</span></li>
+          <li><span class="label">Income Minimum</span><span class="value">$2,000 gross/year</span></li>
+          <li><span class="label">Special Program</span><span class="value">Community Food Sustainability</span></li>
+        </ul>
+      </div>
+      <div class="county-card reveal">
+        <div class="county-card__header">
+          <div class="county-card__dot county-card__dot--maui"></div>
+          <h3>Maui County</h3>
+          <span class="county-card__island">Maui</span>
+        </div>
+        <ul class="county-card__details">
+          <li><span class="label">Status</span><span class="value" style="color:var(--sunset-500)">In Progress</span></li>
+          <li><span class="label">Periods Available</span><span class="value">5, 10, 15, or 20 years</span></li>
+          <li><span class="label">Tax Rate</span><span class="value">$5.74 / $1,000 assessed</span></li>
+          <li><span class="label">Deadline</span><span class="value">September 1 annually</span></li>
+          <li><span class="label">Incentive Structure</span><span class="value">Longer = greater discount</span></li>
+        </ul>
+      </div>
+      <div class="county-card reveal">
+        <div class="county-card__header">
+          <div class="county-card__dot county-card__dot--kauai"></div>
+          <h3>Kauai County</h3>
+          <span class="county-card__island">Kauai</span>
+        </div>
+        <ul class="county-card__details">
+          <li><span class="label">Status</span><span class="value" style="color:var(--sunset-500)">In Progress</span></li>
+          <li><span class="label">Dedication Period</span><span class="value">5-year commitment</span></li>
+          <li><span class="label">Deadline</span><span class="value">July 1 annually</span></li>
+          <li><span class="label">Recent Change</span><span class="value">Ordinance No. 1132</span></li>
+          <li><span class="label">Contact</span><span class="value">(808) 241-4224</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Data & Findings ========== -->
+<section class="section" id="findings">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">Data &amp; Findings</div>
+      <h2 class="section__title">Quantifying the Impact</h2>
+      <p class="section__desc">Preliminary findings from Honolulu County's dedication program based on RPAD data (2013-2024) and QPublic assessment records.</p>
+      <p class="section__desc" style="font-size: 0.8rem; color: #b45309; background: #fef3c7; padding: 8px 16px; border-radius: 6px; margin-top: 8px; display: inline-block;">&#9888; Data below marked with * are illustrative placeholders pending full pipeline analysis. Figures without * are derived from actual RPAD records.</p>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="findings__grid reveal">
+      <div class="finding-card">
+        <div class="finding-card__value">$7.9M *</div>
+        <div class="finding-card__label">Cumulative Base Erosion</div>
+        <div class="finding-card__desc">Proof-of-concept: illustrative 2-parcel scenario over 10 years. Actual figures pending full pipeline analysis.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value">$394K *</div>
+        <div class="finding-card__label">Average Annual Delta V</div>
+        <div class="finding-card__desc">Illustrative per-parcel average. Actual figures pending QPublic scraping and FMV comparison.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value">18,698</div>
+        <div class="finding-card__label">Parcel-Year Observations</div>
+        <div class="finding-card__desc">Actual RPAD record count spanning 13 years of Honolulu County dedication history (2013-2025), extracted from annual PDF reports.</div>
+      </div>
+    </div>
+
+    <!-- Dedication Volume Over Time -->
+    <div class="chart-container reveal">
+      <h3>Annual Dedication Volume, Honolulu County</h3>
+      <p class="chart-subtitle">Number of active agricultural dedications by year (2013-2025) &mdash; actual RPAD data</p>
+      <div class="timeline-chart">
+        <div class="timeline-chart__grid" id="volumeChart">
+          <div class="timeline-bar bar-fill--green" style="height: 100%"><div class="timeline-tooltip">2013: 1,563</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 93%"><div class="timeline-tooltip">2014: 1,446</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 94%"><div class="timeline-tooltip">2015: 1,463</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 92%"><div class="timeline-tooltip">2016: 1,439</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 89%"><div class="timeline-tooltip">2017: 1,392</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 87%"><div class="timeline-tooltip">2018: 1,367</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 90%"><div class="timeline-tooltip">2019: 1,413</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 93%"><div class="timeline-tooltip">2020: 1,451</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 92%"><div class="timeline-tooltip">2021: 1,431</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 93%"><div class="timeline-tooltip">2022: 1,450</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 94%"><div class="timeline-tooltip">2023: 1,467</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 90%"><div class="timeline-tooltip">2024: 1,412</div></div>
+          <div class="timeline-bar bar-fill--green" style="height: 90%"><div class="timeline-tooltip">2025: 1,404</div></div>
+        </div>
+        <div class="timeline-labels">
+          <span>2013</span><span>2014</span><span>2015</span><span>2016</span>
+          <span>2017</span><span>2018</span><span>2019</span><span>2020</span>
+          <span>2021</span><span>2022</span><span>2023</span><span>2024</span>
+          <span>2025</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedication Type Distribution -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div class="chart-container reveal">
+        <h3>Dedication Type Split (2024) *</h3>
+        <p class="chart-subtitle">5-year vs 10-year dedications in Honolulu County &mdash; placeholder figures</p>
+        <div class="donut-container">
+          <div class="donut" style="background: conic-gradient(var(--green-600) 0deg 234deg, var(--ocean-500) 234deg 360deg);">
+            <div class="donut__center">
+              <span class="donut__center-value">1,412</span>
+              <span class="donut__center-label">Total</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--green-600)"></div>
+              <span><strong>10-Year</strong> &mdash; 65% (918 parcels)<br><small style="color:var(--text-muted)">1% FMV assessment</small></span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--ocean-500)"></div>
+              <span><strong>5-Year</strong> &mdash; 35% (494 parcels)<br><small style="color:var(--text-muted)">3% FMV assessment</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container reveal">
+        <h3>Estimated Tax Savings by Parcel Size *</h3>
+        <p class="chart-subtitle">Average annual Delta V by land area category &mdash; placeholder figures; buckets TBD from actual data distribution</p>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">&lt;2 ac</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill--green" style="width: 22%;">$85K</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">2-5 ac</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill--green" style="width: 38%;">$148K</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">5-20 ac</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill--green" style="width: 62%;">$242K</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">20-100</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill--earth" style="width: 82%;">$520K</div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">&gt;100 ac</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-fill--earth" style="width: 100%;">$1.2M</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cumulative Base Erosion -->
+    <div class="chart-container reveal">
+      <h3>Cumulative Base Erosion Over Time *</h3>
+      <p class="chart-subtitle">Illustrative 2-parcel scenario &mdash; placeholder figures pending full pipeline analysis</p>
+      <div class="bar-chart">
+        <div class="bar-row">
+          <div class="bar-label">2016</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 9%;">$686K</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2017</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 18%;">$1.4M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2018</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 27%;">$2.1M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2019</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 36%;">$2.8M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2020</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 45%;">$3.5M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2021</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 55%;">$4.3M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2022</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 67%;">$5.3M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2023</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 82%;">$6.5M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2024</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 93%;">$7.3M</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">2025</div>
+          <div class="bar-track"><div class="bar-fill bar-fill--ocean" style="width: 100%;">$7.9M</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Research Questions -->
+    <div class="chart-container reveal" style="background: linear-gradient(135deg, var(--earth-50), var(--green-100)); border: none;">
+      <h3>Core Research Questions</h3>
+      <p class="chart-subtitle" style="max-width: 100%;">This analysis seeks to answer four key questions about Hawaii's dedication programs</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+        <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: var(--radius-md);">
+          <strong style="color: var(--green-700);">RQ1: Fiscal Impact</strong>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">How much property tax revenue is foregone annually? How has cumulative base erosion evolved (2013-2024)?</p>
+        </div>
+        <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: var(--radius-md);">
+          <strong style="color: var(--green-700);">RQ2: Tax Burden Shift</strong>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">What is the effective rate increase on non-dedicated properties? How does this vary across property classes?</p>
+        </div>
+        <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: var(--radius-md);">
+          <strong style="color: var(--green-700);">RQ3: Who Benefits?</strong>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">What percentage of benefits go to in-state vs. out-of-state owners? Do large landowners capture disproportionate benefits?</p>
+        </div>
+        <div style="padding: 20px; background: rgba(255,255,255,0.7); border-radius: var(--radius-md);">
+          <strong style="color: var(--green-700);">RQ4: Policy Effectiveness</strong>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">Are dedicated parcels actively farmed or merely tax shelters? What is the cost per acre of farmland preserved?</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== CDL Parcel Map ========== -->
+<section class="section section--alt" id="map">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">Satellite Analysis</div>
+      <h2 class="section__title">Are Dedicated Parcels Actually Farmed?</h2>
+      <p class="section__desc">Using the USDA Hawaii Cropland Data Layer (HCDL, 10m resolution, 2024) cross-referenced with 1,185 Honolulu County parcels holding agricultural dedications. Each parcel is colored by its satellite-detected active agriculture percentage.</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="findings__grid reveal" style="margin-bottom: 32px;">
+      <div class="finding-card">
+        <div class="finding-card__value">1,185</div>
+        <div class="finding-card__label">Parcels Analyzed</div>
+        <div class="finding-card__desc">All 2024 Honolulu County dedication parcels matched to TMK parcel boundaries and HCDL raster data.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value" id="stat-zero-ag"></div>
+        <div class="finding-card__label">Show 0% Active Crops</div>
+        <div class="finding-card__desc">Parcels where the HCDL detects no identifiable crop cultivation whatsoever.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value" id="stat-forest-dev"></div>
+        <div class="finding-card__label">Primarily Forest or Developed</div>
+        <div class="finding-card__desc">Parcels where forest + developed land cover exceeds 75% of total area.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value" id="stat-owners"></div>
+        <div class="finding-card__label">Unique Owners</div>
+        <div class="finding-card__desc">Distinct property owners holding agricultural dedications in Honolulu County.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-card__value" id="stat-total-tax"></div>
+        <div class="finding-card__label">Total Tax Paid (2025)</div>
+        <div class="finding-card__desc">Combined property tax paid by all dedicated parcels in the most recent tax year.</div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="chart-container reveal" style="padding: 0; overflow: hidden;">
+      <div id="parcel-map" style="height: 560px; width: 100%; border-radius: var(--radius-lg);"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="reveal" style="display: flex; align-items: center; gap: 24px; margin-top: 16px; flex-wrap: wrap; justify-content: center;">
+      <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Active Agriculture:</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#d32f2f;display:inline-block;"></span> 0%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#f57c00;display:inline-block;"></span> 1-10%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#fbc02d;display:inline-block;"></span> 10-25%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#7cb342;display:inline-block;"></span> 25-50%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#388e3c;display:inline-block;"></span> 50-75%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;"><span style="width:14px;height:14px;border-radius:3px;background:#1b5e20;display:inline-block;"></span> 75-100%</span>
+    </div>
+
+    <!-- Methodology note -->
+    <div class="reveal" style="margin-top: 20px; padding: 16px 20px; background: rgba(26,18,7,0.03); border-radius: var(--radius-md); font-size: 0.82rem; color: var(--text-secondary);">
+      <strong>Data source:</strong> USDA NASS Hawaii Cropland Data Layer V2.0 (2024), produced using Google DeepMind AlphaEarth Foundations AI model at 10m resolution.
+      Parcel boundaries from Hawaii Statewide GIS Program (ESRI:3750).
+      "Active agriculture" includes: banana, citrus, coffee, macadamia, papaya, pineapple, sugarcane, taro, corn, avocados, coconut, sweet potatoes, vegetables &amp; fruits, sweet basil, sunflower, and other crops.
+      <strong>Caveats:</strong> 10m resolution may miss small-scale farming; some tree crops may be classified as forest; pasture/grazing counted separately from active crops.
+    </div>
+  </div>
+</section>
+
+<!-- ========== Data Pipeline ========== -->
+<section class="section section--alt" id="pipeline">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">Methodology</div>
+      <h2 class="section__title">Data Pipeline</h2>
+      <p class="section__desc">From raw PDF reports to actionable policy insights.</p>
+    </div>
+
+    <div class="pipeline reveal">
+      <div class="pipeline__step">
+        <div class="pipeline__icon pipeline__icon--pdf">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><path d="M4 2h10l4 4v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2zm9 1v4h4M7 12h8M7 16h5"/></svg>
+        </div>
+        <div class="pipeline__step-title">PDF Reports</div>
+        <div class="pipeline__step-desc">Annual RPAD<br>reports 2013-2024</div>
+      </div>
+      <div class="pipeline__arrow">&rarr;</div>
+      <div class="pipeline__step">
+        <div class="pipeline__icon pipeline__icon--extract">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><path d="M11 2v14m0 0l-4-4m4 4l4-4M4 18h14"/></svg>
+        </div>
+        <div class="pipeline__step-title">Extract</div>
+        <div class="pipeline__step-desc">Tabula-based<br>table extraction</div>
+      </div>
+      <div class="pipeline__arrow">&rarr;</div>
+      <div class="pipeline__step">
+        <div class="pipeline__icon pipeline__icon--merge">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><path d="M4 6h14M4 11h14M4 16h14" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        </div>
+        <div class="pipeline__step-title">Merge &amp; Clean</div>
+        <div class="pipeline__step-desc">Validate, dedupe,<br>standardize TMKs</div>
+      </div>
+      <div class="pipeline__arrow">&rarr;</div>
+      <div class="pipeline__step">
+        <div class="pipeline__icon pipeline__icon--scrape">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><path d="M3 3h16v12H3zM7 19h8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        </div>
+        <div class="pipeline__step-title">Enrich</div>
+        <div class="pipeline__step-desc">QPublic scraping<br>FMV + use values</div>
+      </div>
+      <div class="pipeline__arrow">&rarr;</div>
+      <div class="pipeline__step">
+        <div class="pipeline__icon pipeline__icon--analyze">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor"><path d="M3 3v16h16M7 15l4-6 4 4 4-8" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        </div>
+        <div class="pipeline__step-title">Analyze</div>
+        <div class="pipeline__step-desc">Yamauchi framework<br>distributional impacts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CLI / Tools ========== -->
+<section class="section" id="tools">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">Toolkit</div>
+      <h2 class="section__title">Command-Line Interface</h2>
+      <p class="section__desc">A modern CLI for every step of the analysis pipeline.</p>
+    </div>
+
+    <div class="cli__content">
+      <div class="cli__text reveal">
+        <p>AG-Dedicated provides a rich command-line interface built on Python 3.9+. Extract PDF data, compare county statutes, scrape parcel records, and generate reports -- all from a single tool.</p>
+
+        <ul class="cli__features">
+          <li>
+            <div class="cli__check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L4.5 8.5 2 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="cli__feature-text">
+              <strong>PDF Extraction</strong>
+              <span>Automated table extraction from annual RPAD reports using Tabula</span>
+            </div>
+          </li>
+          <li>
+            <div class="cli__check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L4.5 8.5 2 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="cli__feature-text">
+              <strong>Statute Comparison</strong>
+              <span>Compare dedication policies across all 4 counties side by side</span>
+            </div>
+          </li>
+          <li>
+            <div class="cli__check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L4.5 8.5 2 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="cli__feature-text">
+              <strong>Web Scraping</strong>
+              <span>Rate-limited, respectful scraping of county QPublic databases</span>
+            </div>
+          </li>
+          <li>
+            <div class="cli__check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L4.5 8.5 2 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="cli__feature-text">
+              <strong>Data Validation</strong>
+              <span>Built-in TMK and petition number validation framework</span>
+            </div>
+          </li>
+          <li>
+            <div class="cli__check">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M10 3L4.5 8.5 2 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="cli__feature-text">
+              <strong>Jupyter Integration</strong>
+              <span>Interactive notebooks for exploratory analysis and visualization</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="reveal">
+        <div class="terminal">
+          <div class="terminal__header">
+            <div class="terminal__dot terminal__dot--red"></div>
+            <div class="terminal__dot terminal__dot--yellow"></div>
+            <div class="terminal__dot terminal__dot--green"></div>
+            <div class="terminal__title">ag-dedicated &mdash; Terminal</div>
+          </div>
+          <div class="terminal__body">
+            <div class="terminal__line"><span class="terminal__comment"># Install the toolkit</span></div>
+            <div class="terminal__line"><span class="terminal__prompt">$ </span><span class="terminal__cmd">pip install -e .</span></div>
+            <div class="terminal__line">&nbsp;</div>
+            <div class="terminal__line"><span class="terminal__comment"># View project configuration</span></div>
+            <div class="terminal__line"><span class="terminal__prompt">$ </span><span class="terminal__cmd">ag-dedicated info</span></div>
+            <div class="terminal__line"><span class="terminal__output">AG-Dedicated Configuration</span></div>
+            <div class="terminal__line"><span class="terminal__output">  Enabled Counties: <span class="terminal__highlight">Honolulu, Hawaii, Maui, Kauai</span></span></div>
+            <div class="terminal__line">&nbsp;</div>
+            <div class="terminal__line"><span class="terminal__comment"># Extract data from PDF reports</span></div>
+            <div class="terminal__line"><span class="terminal__prompt">$ </span><span class="terminal__cmd">ag-dedicated extract</span></div>
+            <div class="terminal__line"><span class="terminal__output">Extracting tables from 12 PDFs...</span></div>
+            <div class="terminal__line"><span class="terminal__output">Merged <span class="terminal__highlight">17,295</span> records across 12 years</span></div>
+            <div class="terminal__line"><span class="terminal__output">Saved to Dedication History/output/cleaned_output.csv</span></div>
+            <div class="terminal__line">&nbsp;</div>
+            <div class="terminal__line"><span class="terminal__comment"># Compare county statutes</span></div>
+            <div class="terminal__line"><span class="terminal__prompt">$ </span><span class="terminal__cmd">ag-dedicated compare --format both</span></div>
+            <div class="terminal__line"><span class="terminal__output">Comparing <span class="terminal__highlight">4</span> counties...</span></div>
+            <div class="terminal__line"><span class="terminal__output">Report saved to ./output/comparison.txt</span></div>
+            <div class="terminal__line">&nbsp;</div>
+            <div class="terminal__line"><span class="terminal__comment"># Scrape parcel assessment data</span></div>
+            <div class="terminal__line"><span class="terminal__prompt">$ </span><span class="terminal__cmd">ag-dedicated scrape honolulu \</span></div>
+            <div class="terminal__line"><span class="terminal__cmd">    --max-parcels 10</span></div>
+            <div class="terminal__line"><span class="terminal__output">Scraping 10 parcels from QPublic...</span></div>
+            <div class="terminal__line"><span class="terminal__output">Enriched data saved to data/processed/</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid rgba(26,18,7,0.06);">
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 8px;"><strong>Python API</strong></p>
+          <div style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-secondary); line-height: 1.8;">
+            <div style="color: var(--text-muted);"># Use programmatically</div>
+            <div><span style="color: var(--ocean-600);">from</span> ag_dedicated.analysis <span style="color: var(--ocean-600);">import</span> StatuteComparison</div>
+            <div>comparison = StatuteComparison(config)</div>
+            <div>report = comparison.generate_comparison_report()</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Legal Framework ========== -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="section__header reveal">
+      <div class="section__eyebrow">Legal Context</div>
+      <h2 class="section__title">Legislative History &amp; County Authority</h2>
+      <p class="section__desc">From a single state statute to four distinct county programs &mdash; the evolution of agricultural dedication in Hawaii spans six decades of policy change.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;" class="reveal">
+      <div class="chart-container" style="margin-bottom: 0;">
+        <h3>Timeline</h3>
+        <div style="position: relative; padding-left: 24px; margin-top: 12px;">
+          <div style="position: absolute; left: 7px; top: 4px; bottom: 4px; width: 2px; background: linear-gradient(to bottom, var(--earth-500), var(--earth-300));"></div>
+
+          <div style="position: relative; margin-bottom: 20px;">
+            <div style="position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--earth-500);"></div>
+            <strong style="font-size: 0.85rem; color: var(--earth-600);">1963 &mdash; HRS &sect;246-12 Enacted</strong>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Hawaii establishes statewide agricultural dedication, modeled after Maryland&rsquo;s 1957 law. Landowners can petition to have farmland assessed at use value rather than market value, with 10-year dedication periods.</p>
+          </div>
+
+          <div style="position: relative; margin-bottom: 20px;">
+            <div style="position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--earth-500);"></div>
+            <strong style="font-size: 0.85rem; color: var(--earth-600);">1973 &mdash; <a href="https://data.capitol.hawaii.gov/slh/Years/SLH1973/SLH1973_Act175.pdf" target="_blank">Act 175</a> (S.B. 176)</strong>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Major expansion: 20-year dedications at 50% of use-value assessment. Eligibility extended to all four land use districts (agricultural, rural, conservation, urban). Introduced automatic deferred &ldquo;rollback&rdquo; tax &mdash; up to 10 years retroactive with 10% annual penalty &mdash; triggered by rezoning or subdivision. Crucially, &sect;246-10(a) mandated use-value assessment for <em>all</em> ag-classified land whether dedicated or not, creating the &ldquo;shadow fair market value&rdquo; practice that complicates analysis of the dedication program&rsquo;s marginal impact.</p>
+          </div>
+
+          <div style="position: relative; margin-bottom: 20px;">
+            <div style="position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--earth-500);"></div>
+            <strong style="font-size: 0.85rem; color: var(--earth-600);">1978 &mdash; Constitutional Amendment</strong>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Hawaii Constitution Article VIII, &sect;3 grants counties authority over real property taxation, beginning the devolution of tax policy from state to county level.</p>
+          </div>
+
+          <div style="position: relative;">
+            <div style="position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--earth-500);"></div>
+            <strong style="font-size: 0.85rem; color: var(--earth-600);">2016 &mdash; Act 52 Repeals Chapter 246</strong>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">HRS Chapter 246 (Real Property Tax Law) formally repealed. The state statute was largely vestigial &mdash; counties had been administering property taxes independently for decades. Agricultural dedication programs now operate <strong>entirely under county ordinances</strong>, each with distinct dedication periods, assessment rates, eligibility rules, and deadlines.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container" style="margin-bottom: 0;">
+        <h3>Current County Authority</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; margin-bottom: 16px;">
+          With the state statute repealed, each county&rsquo;s program has diverged significantly. What began as a uniform statewide framework is now four distinct systems &mdash; making cross-county comparison both more important and more complex.
+        </p>
+        <ul style="list-style: none; margin-top: 8px;">
+          <li style="padding: 12px 0; border-bottom: 1px solid rgba(26,18,7,0.06); font-size: 0.9rem;">
+            <strong>Honolulu</strong> &mdash; <a href="https://codelibrary.amlegal.com/codes/honolulu/latest/honolulu/0-0-0-5936" target="_blank">ROH &sect;8-7.3</a>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">5 &amp; 10-year dedications; 3% &amp; 1% FMV; &ge;75% active use</div>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid rgba(26,18,7,0.06); font-size: 0.9rem;">
+            <strong>Hawaii County</strong> &mdash; <a href="https://hawaiipropertytax.com/" target="_blank">County Tax Office</a>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">3-year short-term, 10-year long-term, Community Food Sustainability; $2K gross income minimum</div>
+          </li>
+          <li style="padding: 12px 0; border-bottom: 1px solid rgba(26,18,7,0.06); font-size: 0.9rem;">
+            <strong>Maui</strong> &mdash; <a href="https://www.mauicounty.gov/1953/RPA-Forms-and-Instructions" target="_blank">County RPA</a>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">5&ndash;20 year range; longer commitments = greater discounts</div>
+          </li>
+          <li style="padding: 12px 0; font-size: 0.9rem;">
+            <strong>Kauai</strong> &mdash; <a href="https://www.kauai.gov/Government/Departments-Agencies/Finance/Real-Property-Tax/Assessment" target="_blank">Assessment Office</a>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">5-year commitment; Ordinance 1132 replaced prior program</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Footer ========== -->
+<footer class="footer" id="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="nav__brand" style="color: var(--earth-100); margin-bottom: 4px;">
+          <svg viewBox="0 0 28 28" fill="none" width="28" height="28"><rect width="28" height="28" rx="6" fill="#2e7d32"/><path d="M14 6c-1.5 3-5 5-5 10a5 5 0 0010 0c0-5-3.5-7-5-10z" fill="#fff" opacity="0.9"/><path d="M12 14c0 2.5 1 4 2 5m0-5c1 1 2 2.5 2 5" stroke="#2e7d32" stroke-width="1.2" fill="none"/></svg>
+          AG-Dedicated v2.0
+        </div>
+        <p class="footer__brand">Comprehensive analysis of Hawaii's agricultural property tax dedication system. A modern data science toolkit for understanding tax incentive programs across all four counties.</p>
+      </div>
+      <div>
+        <h4 class="footer__heading">Navigation</h4>
+        <ul class="footer__links">
+          <li><a href="#about">Research</a></li>
+          <li><a href="#counties">Counties</a></li>
+          <li><a href="#findings">Findings</a></li>
+          <li><a href="#map">Satellite Map</a></li>
+          <li><a href="#tools">Tools</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer__heading">Resources</h4>
+        <ul class="footer__links">
+          <li><a href="https://github.com/supersistence/AG-Dedicated" target="_blank">GitHub Repository</a></li>
+          <li><a href="https://data.capitol.hawaii.gov/slh/Years/SLH1973/SLH1973_Act175.pdf" target="_blank">Act 175 (1973)</a></li>
+          <li><a href="http://www.farmlandinfo.org" target="_blank">Farmland Information Center</a></li>
+          <li><a href="https://www.farmland.org" target="_blank">American Farmland Trust</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer__heading">References</h4>
+        <ul class="footer__links">
+          <li><a href="#">Yamauchi (1980)</a></li>
+          <li><a href="#">Howard Co. (1974)</a></li>
+          <li><a href="#">Okimoto (1981)</a></li>
+          <li><a href="https://geoportal.hawaii.gov/" target="_blank">Hawaii State GIS</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="footer__divider">
+    <div class="footer__bottom">
+      <span>MIT License. Research and analysis tool -- not legal or tax advice.</span>
+      <span>Python 3.9+ &nbsp;|&nbsp; <a href="https://github.com/supersistence/AG-Dedicated" target="_blank">View on GitHub</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Navigation scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Mobile menu
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => navLinks.classList.remove('open'));
+});
+
+// Scroll reveal
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealElements.forEach(el => observer.observe(el));
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ========== Parcel CDL Map ==========
+(function() {
+  const mapEl = document.getElementById('parcel-map');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  const map = L.map('parcel-map', {
+    center: [21.45, -158.0],
+    zoom: 11,
+    zoomControl: true,
+    scrollWheelZoom: false,
+  });
+
+  // Satellite base tiles
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Color scale: red (0% ag) -> yellow -> green (100% ag)
+  function agColor(pct) {
+    if (pct <= 0) return '#d32f2f';
+    if (pct < 10) return '#f57c00';
+    if (pct < 25) return '#fbc02d';
+    if (pct < 50) return '#7cb342';
+    if (pct < 75) return '#388e3c';
+    return '#1b5e20';
+  }
+
+  function style(feature) {
+    const p = feature.properties;
+    return {
+      fillColor: agColor(p.active_ag),
+      weight: 1,
+      opacity: 0.7,
+      color: '#333',
+      fillOpacity: 0.7,
+    };
+  }
+
+  function onEachFeature(feature, layer) {
+    const p = feature.properties;
+
+    // Build petitions list
+    let petHtml = '';
+    if (p.petitions && p.petitions.length > 0) {
+      petHtml = p.petitions.map(function(pet) {
+        return '<div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:2px 0;">' +
+          '<span>' + pet.number + '</span>' +
+          '<span style="color:#ccc;margin:0 6px;">|</span>' +
+          '<span style="color:#888;">' + pet.type + '</span>' +
+          '<span style="color:#ccc;margin:0 6px;">|</span>' +
+          '<span>ends ' + (pet.end_year || '?') + '</span>' +
+        '</div>';
+      }).join('');
+    }
+
+    // QPublic link
+    var qpubHtml = p.qpub_link
+      ? '<a href="' + p.qpub_link + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:0.82rem;color:#1565c0;text-decoration:none;font-weight:600;">View ownership on QPublic &rarr;</a>'
+      : '';
+
+    // Owner and tax section
+    var ownerHtml = '';
+    if (p.owner) {
+      ownerHtml = '<hr style="margin:8px 0;border:none;border-top:1px solid #eee;">' +
+        '<div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px;">Ownership &amp; Tax</div>' +
+        '<div style="font-size:0.85rem;">' +
+          '<strong>' + p.owner + '</strong>' +
+          (p.co_owners ? '<br><span style="color:#888;font-size:0.8rem;">+ ' + p.co_owners + '</span>' : '') +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:0.85rem;margin-top:4px;">' +
+          (p.property_class ? '<span>Class:</span><span>' + p.property_class + '</span>' : '') +
+          (p.net_taxable ? '<span>Net taxable:</span><strong>' + p.net_taxable + '</strong>' : '') +
+          (p.dedicated_value && p.dedicated_value !== '$0' ? '<span>Dedicated val:</span><span>' + p.dedicated_value + '</span>' : '') +
+          (p.tax_amount ? '<span>Tax paid:</span><strong>' + p.tax_amount + '</strong>' : '') +
+        '</div>';
+    }
+
+    layer.bindPopup(
+      '<div style="font-family:system-ui;min-width:250px;max-width:340px;">' +
+
+      '<strong style="font-size:1.05rem;">TMK ' + (p.tmk_fmt || p.tmk) + '</strong><br>' +
+      (p.address ? '<span style="color:#555;font-size:0.85rem;">' + p.address + '</span><br>' : '') +
+      '<span style="color:#888;font-size:0.82rem;">' + p.acres + ' acres &mdash; ' + p.county + '</span>' +
+
+      '<hr style="margin:8px 0;border:none;border-top:1px solid #eee;">' +
+      '<div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px;">Dedications</div>' +
+      (petHtml || '<span style="font-size:0.82rem;color:#999;">No petition data</span>') +
+
+      ownerHtml +
+
+      '<hr style="margin:8px 0;border:none;border-top:1px solid #eee;">' +
+      '<div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px;">Satellite Land Use (2024)</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:0.85rem;">' +
+        '<span>Active crops:</span><strong style="color:' + agColor(p.active_ag) + '">' + p.active_ag + '%</strong>' +
+        '<span>Pasture:</span><strong>' + p.pasture + '%</strong>' +
+        '<span>Non-ag:</span><strong style="color:' + (p.non_ag > 50 ? '#d32f2f' : '#666') + '">' + p.non_ag + '%</strong>' +
+        '<span>Primary:</span><strong>' + p.top_crop + '</strong>' +
+      '</div>' +
+
+      (qpubHtml ? '<hr style="margin:8px 0;border:none;border-top:1px solid #eee;">' + qpubHtml : '') +
+
+      '</div>',
+      { maxWidth: 340 }
+    );
+  }
+
+  // Load GeoJSON - try fetch first, fall back to script tag for file:// protocol
+  function loadGeoJSON() {
+    return fetch('parcels_cdl.json').then(r => {
+      if (!r.ok) throw new Error('fetch failed');
+      return r.json();
+    });
+  }
+
+  // Try loading via JSONP-style script if fetch fails (file:// CORS)
+  function loadViaScript() {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'parcels_cdl.js';
+      script.onload = () => resolve(window.__parcelData);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  (window.__parcelData ? Promise.resolve(window.__parcelData) : loadGeoJSON().catch(() => loadViaScript()))
+    .then(data => {
+      const layer = L.geoJSON(data, { style, onEachFeature }).addTo(map);
+
+      // Fit bounds to parcels
+      if (data.features.length > 0) {
+        map.fitBounds(layer.getBounds(), { padding: [30, 30] });
+      }
+
+      // Compute stats
+      const features = data.features;
+      const total = features.length;
+      let zeroAg = 0;
+      let forestDev = 0;
+      let totalTax = 0;
+      let taxCount = 0;
+      let ownersSet = new Set();
+      features.forEach(f => {
+        const p = f.properties;
+        if (p.active_ag === 0) zeroAg++;
+        if (p.non_ag > 75) forestDev++;
+        if (p.tax_amount) {
+          const amt = parseFloat(p.tax_amount.replace(/[$,]/g, ''));
+          if (!isNaN(amt)) { totalTax += amt; taxCount++; }
+        }
+        if (p.owner) ownersSet.add(p.owner);
+      });
+
+      const statZero = document.getElementById('stat-zero-ag');
+      const statFD = document.getElementById('stat-forest-dev');
+      if (statZero) statZero.textContent = Math.round(zeroAg / total * 100) + '%';
+      if (statFD) statFD.textContent = Math.round(forestDev / total * 100) + '%';
+      const statOwners = document.getElementById('stat-owners');
+      const statTax = document.getElementById('stat-total-tax');
+      if (statOwners) statOwners.textContent = ownersSet.size.toLocaleString();
+      if (statTax) statTax.textContent = '$' + Math.round(totalTax).toLocaleString();
+    })
+    .catch(err => {
+      mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:0.9rem;">Map data could not be loaded. Run the CDL analysis pipeline to generate parcels_cdl.json.</div>';
+    });
+})();
+</script>
+
+</body>
+</html>
