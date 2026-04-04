@@ -1445,7 +1445,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         '<div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px;">Ownership &amp; Tax</div>' +
         '<div style="font-size:0.85rem;">' +
           '<strong>' + p.owner + '</strong>' +
-          (p.co_owners ? '<br><span style="color:#888;font-size:0.8rem;">+ ' + p.co_owners + '</span>' : '') +
+          (p.co_owners ? '<br><span style="color:#888;font-size:0.8rem;">+ ' + (function(s) { var parts = s.split('; '); if (parts.length <= 5) return s; return parts.slice(0,5).join('; ') + '; ... and ' + (parts.length - 5) + ' more owners'; })(p.co_owners) + '</span>' : '') +
         '</div>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:0.85rem;margin-top:4px;">' +
           (p.property_class ? '<span>Class:</span><span>' + p.property_class + '</span>' : '') +
@@ -1480,7 +1480,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       (qpubHtml ? '<hr style="margin:8px 0;border:none;border-top:1px solid #eee;">' + qpubHtml : '') +
 
       '</div>',
-      { maxWidth: 340 }
+      { maxWidth: 340, maxHeight: 400 }
     );
   }
 
